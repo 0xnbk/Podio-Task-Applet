@@ -41,6 +41,7 @@ class PodioTaskApplet:
         db.close()
        
         self.window.hide()
+        self.menu_setup()
 
     def menu_setup(self):
             
@@ -100,16 +101,16 @@ class PodioTaskApplet:
         
         rows = db.fetchone()
 
-        client_id = rows[2]
-        client_secret = rows[3]
-        username = rows[0]
-        password = rows[1]
+        self.client_id = rows[2]
+        self.client_secret = rows[3]
+        self.username = rows[0]
+        self.password = rows[1]
     
         c = api.OAuthClient(
-            client_id,
-            client_secret,
-            username,
-            password,    
+            self.client_id,
+            self.client_secret,
+            self.username,
+            self.password,    
         )
     
      
@@ -129,6 +130,18 @@ class PodioTaskApplet:
       self.glade.add_from_file(self.gladefile)
       self.glade.connect_signals(self)
       self.window = self.glade.get_object("preference_box")
+      
+      # Populate values from DB
+      podio_email = self.glade.get_object("podio_email")
+      podio_password = self.glade.get_object("podio_password")
+      podio_client_id = self.glade.get_object("podio_client_id")
+      podio_client_secret = self.glade.get_object("podio_client_secret")
+      
+      podio_email.set_text(self.username)
+      podio_password.set_text(self.password)
+      podio_client_id.set_text(self.client_id)
+      podio_client_secret.set_text(self.client_secret)
+
       self.window.show() 
 
 
