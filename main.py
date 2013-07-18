@@ -5,16 +5,18 @@ from gi.repository import Gtk
 import sys
 from gi.repository import AppIndicator3 as AppIndicator
 import sqlite3 as lite
+#from pypodio2 import api
 
 import imaplib
 import re
 import os
 
 PING_FREQUENCY = 10 # seconds
-con = lite.connect('db/podio.sqlite3')
+
 
 class PodioTaskApplet:
     def __init__(self):
+        self.con = lite.connect('db/podio.sqlite3')
         self.working_dir = os.getcwd()
         self.ind = AppIndicator.Indicator.new("podio-task-indicator",
             self.working_dir +"/assets/podio.png",
@@ -25,20 +27,39 @@ class PodioTaskApplet:
         self.menu_setup()
         self.ind.set_menu(self.menu)
         
-    def save_settings(self , dialog, *_args):
-        cur = con.cursor()    
-        cur.execute("SELECT * FROM podio_user")
-
+        cur = self.con.cursor()    
+        cur.execute("SELECT * from podio_user")
+        
         rows = cur.fetchall()
         
-        if len(rows) == 0 :
-            # Insert new row
-            print 'Insert new row'
-            
-            
-        else :
-            print 'Update existing row'
-    
+        print len(rows)
+
+#==============================================================================
+#         c = api.OAuthClient(
+#         client_id,
+#         client_secret,
+#         username,
+#         password    
+#         )
+# 
+# 
+#         print c.Task.get_summary(limit = 10)
+#==============================================================================
+        
+    def save_settings(self , dialog, *_args):
+        cur = self.con.cursor()    
+        # cur.execute("DELETE from podio_user")
+
+        
+        podio_email = self.glade.get_object("podio_email").get_text()
+        podio_password = self.glade.get_object("podio_password").get_text()
+        podio_client_id = self.glade.get_object("podio_client_id").get_text()
+        podio_client_secret = self.glade.get_object("podio_client_secret").get_text()
+        
+        cur.execute("INSERT INTO podio_user VALUES ('"+podio_email+"','"+podio_password+"','"+podio_client_id+"','"+podio_client_secret+"');")
+        print cur.lastrowid
+       
+       # self.window.hide()
 
     def menu_setup(self):
         self.menu = Gtk.Menu()
@@ -105,7 +126,8 @@ class PodioTaskApplet:
       self.glade = Gtk.Builder()
       self.glade.add_from_file(self.gladefile)
       self.glade.connect_signals(self)
-      self.glade.get_object("preference_box").show() 
+      self.window = self.glade.get_object("preference_box")
+      self.window.show() 
 
 
 
