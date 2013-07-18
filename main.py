@@ -5,7 +5,7 @@ from gi.repository import Gtk
 import sys
 from gi.repository import AppIndicator3 as AppIndicator
 import sqlite3 as lite
-#from pypodio2 import api
+from pypodio2 import api
 
 import imaplib
 import re
@@ -16,7 +16,7 @@ PING_FREQUENCY = 10 # seconds
 
 class PodioTaskApplet:
     def __init__(self):
-        self.con = lite.connect('db/podio.sqlite3')
+        self.con = lite.connect('db/podio.sqlite3', isolation_level=None)
         self.working_dir = os.getcwd()
         self.ind = AppIndicator.Indicator.new("podio-task-indicator",
             self.working_dir +"/assets/podio.png",
@@ -26,42 +26,24 @@ class PodioTaskApplet:
 
         self.menu_setup()
         self.ind.set_menu(self.menu)
-        
-        cur = self.con.cursor()    
-        cur.execute("SELECT * from podio_user")
-        
-        rows = cur.fetchall()
-        
-        print len(rows)
 
-#==============================================================================
-#         c = api.OAuthClient(
-#         client_id,
-#         client_secret,
-#         username,
-#         password    
-#         )
-# 
-# 
-#         print c.Task.get_summary(limit = 10)
-#==============================================================================
-        
+       
     def save_settings(self , dialog, *_args):
-        cur = self.con.cursor()    
-        # cur.execute("DELETE from podio_user")
-
+        db = self.con.cursor()    
+        db.execute("DELETE from podio_user")
         
         podio_email = self.glade.get_object("podio_email").get_text()
         podio_password = self.glade.get_object("podio_password").get_text()
         podio_client_id = self.glade.get_object("podio_client_id").get_text()
         podio_client_secret = self.glade.get_object("podio_client_secret").get_text()
         
-        cur.execute("INSERT INTO podio_user VALUES ('"+podio_email+"','"+podio_password+"','"+podio_client_id+"','"+podio_client_secret+"');")
-        print cur.lastrowid
+        db.execute("INSERT INTO podio_user(user_email, user_password, client_id, client_secret) VALUES ('"+podio_email+"','"+podio_password+"','"+podio_client_id+"','"+podio_client_secret+"');")
+        db.close()
        
-       # self.window.hide()
+        self.window.hide()
 
     def menu_setup(self):
+            
         self.menu = Gtk.Menu()
 
         # Separators
@@ -112,6 +94,26 @@ class PodioTaskApplet:
         self.quit_item.connect("activate", self.quit)
         self.quit_item.show()
         self.menu.append(self.quit_item)
+        
+        db = self.con.cursor()    
+        db.execute("SELECT * from podio_user")
+        
+        rows = db.fetchone()
+
+        client_id = rows[2]
+        client_secret = rows[3]
+        username = rows[0]
+        password = rows[1]
+    
+        c = api.OAuthClient(
+            client_id,
+            client_secret,
+            username,
+            password,    
+        )
+    
+     
+        print c.Task.get_summary(limit = 2)
         
         
     def open_about_item(self, widget) :
