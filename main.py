@@ -2,18 +2,16 @@ __author__ = 'Nikhil Ben Kuruvilla'
 
 #!/usr/bin/env python
 from gi.repository import Gtk
+from gi.repository import GLib
 import sys
 from gi.repository import AppIndicator3 as AppIndicator
 import sqlite3 as lite
 from pypodio2 import api
 import webbrowser
 
-import imaplib
-import re
 import os
 
-PING_FREQUENCY = 10 # seconds
-
+PING_FREQUENCY = 60 # seconds
 
 class PodioTaskApplet:
     def __init__(self):
@@ -23,10 +21,13 @@ class PodioTaskApplet:
             self.working_dir +"/assets/podio.png",
             AppIndicator.IndicatorCategory.APPLICATION_STATUS)
         self.ind.set_status(AppIndicator.IndicatorStatus.ACTIVE)
+        
         self.ind.set_attention_icon(self.working_dir +"/assets/podio.png")
 
         self.menu_setup()
         self.ind.set_menu(self.menu)
+        
+        GLib.timeout_add(PING_FREQUENCY * 1000, self.menu_setup)
 
        
     def save_settings(self , dialog, *_args):
@@ -43,53 +44,64 @@ class PodioTaskApplet:
        
         self.window.hide()
         self.menu_setup()
-
-    def menu_setup(self):
-            
-        self.menu = Gtk.Menu()
         
-        
+    def list_task (self):
+           
         db = self.con.cursor()    
         db.execute("SELECT * from podio_user")
         
         rows = db.fetchone()
+  
+        if len(rows) > 0:
 
-        self.client_id = rows[2]
-        self.client_secret = rows[3]
-        self.username = rows[0]
-        self.password = rows[1]
+            self.client_id = rows[2]
+            self.client_secret = rows[3]
+            self.username = rows[0]
+            self.password = rows[1]
+        
+            c = api.OAuthClient(
+                self.client_id,
+                self.client_secret,
+                self.username,
+                self.password,    
+            )
+        
+         
+            task = c.Task.get_summary(limit = 50)
     
-        c = api.OAuthClient(
-            self.client_id,
-            self.client_secret,
-            self.username,
-            self.password,    
-        )
-    
-     
-        task = c.Task.get_summary(limit = 50)
+            if "overdue" in task:
+                
+                #Change app
+                self.ind.set_status(AppIndicator.IndicatorStatus.ATTENTION)
+                
+                self.build_task_items(task["overdue"]["tasks"])
+                 
+            if "today" in task:
+                self.build_task_items(task["today"]["tasks"])
+                     
+                     
+            if "upcoming" in task:
+                self.build_task_items(task["upcoming"]["tasks"])
+                
+            if "other" in task:
+                self.build_task_items(task["other"]["tasks"])
+                       
+    def build_task_items (self, data) :
+        for item in data:
+            text = self.cap(item["text"], 40)
+            show_task = Gtk.MenuItem(text)
+            link = item["link"]
+            show_task.connect("activate", self.open_task, link)
+            show_task.show()
+            self.menu.append(show_task)
 
-        if "overdue" in task:
-            for item in task["overdue"]["tasks"]:
-                 show_task = Gtk.MenuItem(item["text"])
-                 link = item["link"]
-                 show_task.connect("activate", self.open_task, link)
-                 show_task.show()
-                 self.menu.append(show_task)
-
-             
-        if "today" in task:
-            for item in task["today"]["tasks"]:
-                 show_task = Gtk.MenuItem(item["text"])
-                 link = item["link"]
-                 show_task.connect("activate", self.open_task, link)
-                 show_task.show()
-                 self.menu.append(show_task)
-           
-           
+    def menu_setup(self):
         
+        print "Inside menu_setup"
+            
+        self.menu = Gtk.Menu()
         
-        
+        self.list_task()
 
         # Separators
         sep_1 = Gtk.SeparatorMenuItem()
@@ -126,12 +138,10 @@ class PodioTaskApplet:
         self.quit_item = Gtk.MenuItem("Quit")
         self.quit_item.connect("activate", self.quit)
         self.quit_item.show()
-        self.menu.append(self.quit_item)
-        
+        self.menu.append(self.quit_item)   
       
-        
-        
     def open_about_item(self, widget) :
+        
       self.gladefile = "ui/about_box.glade"  
       self.glade = Gtk.Builder()
       self.glade.add_from_file(self.gladefile)
@@ -157,13 +167,9 @@ class PodioTaskApplet:
       podio_client_secret.set_text(self.client_secret)
 
       self.window.show() 
-
-
-
-    def main(self):
-        self.check_mail()
-       # Gtk.timeout_add(PING_FREQUENCY * 1000, self.check_mail)
-        Gtk.main()
+      
+    def cap(self, s, l):
+        return s if len(s)<=l else s[0:l-3]+'...'
 
     def quit(self, widget):
         sys.exit(0)
@@ -177,26 +183,6 @@ class PodioTaskApplet:
     def open_task(self, widget, *data):
         webbrowser.open(data[0])
         
-    def check_mail(self):
-        messages, unread = self.gmail_checker('email','pass')
-        if unread > 0:
-            self.ind.set_status(AppIndicator.IndicatorStatus.ATTENTION)
-        else:
-            self.ind.set_status(AppIndicator.IndicatorStatus.ACTIVE)
-        return True
-
-    def gmail_checker(self, username, password):
-        i = imaplib.IMAP4_SSL('imap.gmail.com')
-        try:
-            i.login(username, password)
-            x, y = i.status('INBOX', '(MESSAGES UNSEEN)')
-            messages = int(re.search('MESSAGES\s+(\d+)', y[0]).group(1))
-            unseen = int(re.search('UNSEEN\s+(\d+)', y[0]).group(1))
-            return (messages, unseen)
-        except:
-            return False, 0
-
 if __name__ == "__main__":
     indicator = PodioTaskApplet()
-    indicator.main()
     Gtk.main()
