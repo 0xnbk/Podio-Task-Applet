@@ -46,23 +46,49 @@ class PodioTaskApplet:
     def menu_setup(self):
             
         self.menu = Gtk.Menu()
+        
+        
+        db = self.con.cursor()    
+        db.execute("SELECT * from podio_user")
+        
+        rows = db.fetchone()
+
+        self.client_id = rows[2]
+        self.client_secret = rows[3]
+        self.username = rows[0]
+        self.password = rows[1]
+    
+        c = api.OAuthClient(
+            self.client_id,
+            self.client_secret,
+            self.username,
+            self.password,    
+        )
+    
+     
+        task = c.Task.get_summary(limit = 50)
+
+        if "overdue" in task:
+            for item in task["overdue"]["tasks"]:
+                 show_task = Gtk.MenuItem(item["text"])
+                 show_task.show()
+                 self.menu.append(show_task)
+
+             
+        if "today" in task:
+            for item in task["today"]["tasks"]:
+                 show_task = Gtk.MenuItem(item["text"])
+                 show_task.show()
+                 self.menu.append(show_task)
+           
+           
+        
+        
+        
 
         # Separators
         sep_1 = Gtk.SeparatorMenuItem()
         sep_2 = Gtk.SeparatorMenuItem()
-
-        # Sample Tasks
-        self.task_1 = Gtk.MenuItem("Zendesk Salesforce Integration")
-        self.task_2 = Gtk.MenuItem("Put up the time registration app")
-        self.task_3 = Gtk.MenuItem("Please fix the web issue")
-
-        self.task_1.show()
-        self.task_2.show()
-        self.task_3.show()
-
-        self.menu.append(self.task_1)
-        self.menu.append(self.task_2)
-        self.menu.append(self.task_3)
 
         # Show separator
         sep_1.show()
@@ -96,25 +122,7 @@ class PodioTaskApplet:
         self.quit_item.show()
         self.menu.append(self.quit_item)
         
-        db = self.con.cursor()    
-        db.execute("SELECT * from podio_user")
-        
-        rows = db.fetchone()
-
-        self.client_id = rows[2]
-        self.client_secret = rows[3]
-        self.username = rows[0]
-        self.password = rows[1]
-    
-        c = api.OAuthClient(
-            self.client_id,
-            self.client_secret,
-            self.username,
-            self.password,    
-        )
-    
-     
-        print c.Task.get_summary(limit = 2)
+      
         
         
     def open_about_item(self, widget) :
