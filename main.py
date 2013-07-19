@@ -6,6 +6,7 @@ import sys
 from gi.repository import AppIndicator3 as AppIndicator
 import sqlite3 as lite
 from pypodio2 import api
+import webbrowser
 
 import imaplib
 import re
@@ -71,6 +72,8 @@ class PodioTaskApplet:
         if "overdue" in task:
             for item in task["overdue"]["tasks"]:
                  show_task = Gtk.MenuItem(item["text"])
+                 link = item["link"]
+                 show_task.connect("activate", self.open_task, link)
                  show_task.show()
                  self.menu.append(show_task)
 
@@ -78,6 +81,8 @@ class PodioTaskApplet:
         if "today" in task:
             for item in task["today"]["tasks"]:
                  show_task = Gtk.MenuItem(item["text"])
+                 link = item["link"]
+                 show_task.connect("activate", self.open_task, link)
                  show_task.show()
                  self.menu.append(show_task)
            
@@ -102,6 +107,7 @@ class PodioTaskApplet:
 
         # Help
         self.help_item = Gtk.MenuItem("Help")
+        self.help_item.connect("activate", self.open_help)
         self.help_item.show()
         self.menu.append(self.help_item)
 
@@ -164,6 +170,12 @@ class PodioTaskApplet:
         
     def on_cancel_clicked(self, dialog, *_args):
         dialog.destroy()
+        
+    def open_help(self, widget):
+        webbrowser.open('http://podio.nikhilben.com/task-applet/help')
+        
+    def open_task(self, widget, *data):
+        webbrowser.open(data[0])
         
     def check_mail(self):
         messages, unread = self.gmail_checker('email','pass')
