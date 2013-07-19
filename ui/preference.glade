@@ -10,8 +10,7 @@
     <property name="title" translatable="yes">Podio Task Preference</property>
     <property name="resizable">False</property>
     <property name="window_position">center-always</property>
-    <property name="icon">podio-black.png</property>
-    <property name="icon_name">Podio task preference</property>
+    <property name="icon">podio.png</property>
     <child>
       <object class="GtkBox" id="box1">
         <property name="visible">True</property>
@@ -56,8 +55,8 @@
                 <property name="placeholder_text">name@example.com</property>
               </object>
               <packing>
-                <property name="resize">True</property>
-                <property name="shrink">True</property>
+                <property name="resize">False</property>
+                <property name="shrink">False</property>
               </packing>
             </child>
           </object>
@@ -92,8 +91,8 @@
                 <property name="placeholder_text">Podio Password</property>
               </object>
               <packing>
-                <property name="resize">True</property>
-                <property name="shrink">True</property>
+                <property name="resize">False</property>
+                <property name="shrink">False</property>
               </packing>
             </child>
           </object>
@@ -140,8 +139,8 @@
                 <property name="placeholder_text">Podio Client ID</property>
               </object>
               <packing>
-                <property name="resize">True</property>
-                <property name="shrink">True</property>
+                <property name="resize">False</property>
+                <property name="shrink">False</property>
               </packing>
             </child>
           </object>
@@ -168,15 +167,15 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="podio_secret">
+              <object class="GtkEntry" id="podio_client_secret">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="invisible_char">•</property>
                 <property name="placeholder_text">Podio Client Secret</property>
               </object>
               <packing>
-                <property name="resize">True</property>
-                <property name="shrink">True</property>
+                <property name="resize">False</property>
+                <property name="shrink">False</property>
               </packing>
             </child>
           </object>

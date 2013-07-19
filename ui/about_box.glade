@@ -4,8 +4,7 @@
   <object class="GtkAboutDialog" id="podio_task_applet">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
-    <property name="icon">podio-black.png</property>
-    <property name="icon_name">About</property>
+    <property name="icon">podio.png</property>
     <property name="type_hint">dialog</property>
     <property name="program_name">Podio Task Applet</property>
     <property name="version"> V 0.1 Beta</property>
@@ -44,10 +43,10 @@ and the logo &amp; name is used for good intention only.</property>
 
 Akhil Ben &lt;http://facebook.com/akhil.ben&gt;
 
- 
+Akhila G  &lt;akhila.g@outlook.com&gt; 
 </property>
-    <property name="artists">Akhila G  &lt;akhila.g@outlook.com&gt;</property>
-    <property name="logo">podio.png</property>
+    <property name="artists"></property>
+    <property name="logo">podio-64.png</property>
     <property name="wrap_license">True</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="aboutdialog-vbox1">
