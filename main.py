@@ -18,17 +18,12 @@ class PodioTaskApplet:
         self.con = lite.connect('db/podio.sqlite3', isolation_level=None)
         self.working_dir = os.getcwd()
         self.ind = AppIndicator.Indicator.new("podio-task-indicator",
-            self.working_dir +"/assets/podio.png",
+            self.working_dir +"/assets/podio_grey.png",
             AppIndicator.IndicatorCategory.APPLICATION_STATUS)
         self.ind.set_status(AppIndicator.IndicatorStatus.ACTIVE)
-        
-        self.ind.set_attention_icon(self.working_dir +"/assets/podio.png")
-
+       
         self.menu_setup()
         self.ind.set_menu(self.menu)
-        
-        GLib.timeout_add(PING_FREQUENCY * 1000, self.menu_setup)
-
        
     def save_settings(self , dialog, *_args):
         db = self.con.cursor()    
@@ -68,22 +63,38 @@ class PodioTaskApplet:
         
          
             task = c.Task.get_summary(limit = 50)
+            overdue = 0
+
     
-            if "overdue" in task:
+            if "overdue" in task and task["overdue"]["total"] > 0:
                 
-                #Change app
+                #Change app icon
+                 
+                self.ind.set_attention_icon(self.working_dir +"/assets/podio_red.png")
                 self.ind.set_status(AppIndicator.IndicatorStatus.ATTENTION)
+                
+                overdue = 1
                 
                 self.build_task_items(task["overdue"]["tasks"])
                  
-            if "today" in task:
+            if "today" in task and task["today"]["total"] > 0:
+    
+                if overdue == 0:                
+                    
+                    #Change app icon
+                     
+                    self.ind.set_attention_icon(self.working_dir +"/assets/podio.png")
+                    self.ind.set_status(AppIndicator.IndicatorStatus.ATTENTION)                
+                
                 self.build_task_items(task["today"]["tasks"])
                      
                      
             if "upcoming" in task:
+           
                 self.build_task_items(task["upcoming"]["tasks"])
                 
             if "other" in task:
+                
                 self.build_task_items(task["other"]["tasks"])
                        
     def build_task_items (self, data) :
@@ -98,6 +109,9 @@ class PodioTaskApplet:
     def menu_setup(self):
         
         print "Inside menu_setup"
+        
+                
+        GLib.timeout_add(PING_FREQUENCY * 1000, self.menu_setup)
             
         self.menu = Gtk.Menu()
         
@@ -110,6 +124,7 @@ class PodioTaskApplet:
         # Show separator
         sep_1.show()
         self.menu.append(sep_1)
+
 
         # Preferences
         self.pref_item = Gtk.MenuItem("Preferences")
