@@ -124,7 +124,12 @@ class PodioTaskApplet:
         # Show separator
         sep_1.show()
         self.menu.append(sep_1)
-
+        
+        # Refresh
+        self.refresh_item = Gtk.MenuItem("Refresh")
+        self.refresh_item.connect("activate", self.refresh_task)
+        self.refresh_item.show()
+        self.menu.append(self.refresh_item)
 
         # Preferences
         self.pref_item = Gtk.MenuItem("Preferences")
@@ -188,6 +193,9 @@ class PodioTaskApplet:
 
     def quit(self, widget):
         sys.exit(0)
+        
+    def refresh_task(self, widget):
+        self.menu_setup()
         
     def on_cancel_clicked(self, dialog, *_args):
         dialog.destroy()
