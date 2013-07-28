@@ -21,6 +21,8 @@ class PodioTaskApplet:
             self.working_dir +"/assets/podio_grey.png",
             AppIndicator.IndicatorCategory.APPLICATION_STATUS)
         self.ind.set_status(AppIndicator.IndicatorStatus.ACTIVE)
+        
+        self.refresh = "false"
        
         self.menu_setup()
         self.ind.set_menu(self.menu)
@@ -110,8 +112,10 @@ class PodioTaskApplet:
         
         print "Inside menu_setup"
         
-                
-        GLib.timeout_add(PING_FREQUENCY * 1000, self.menu_setup)
+        if self.refresh == "false":        
+            GLib.timeout_add(PING_FREQUENCY * 1000, self.menu_setup)
+            
+        self.refresh = "false"
             
         self.menu = Gtk.Menu()
         
@@ -195,7 +199,9 @@ class PodioTaskApplet:
         sys.exit(0)
         
     def refresh_task(self, widget):
+        self.refresh = "true"
         self.menu_setup()
+        
         
     def on_cancel_clicked(self, dialog, *_args):
         dialog.destroy()
