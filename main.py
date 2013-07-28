@@ -119,7 +119,13 @@ class PodioTaskApplet:
             
         self.menu = Gtk.Menu()
         
-        self.list_task()
+        try :        
+            self.list_task()
+        except:
+            self.try_connect = Gtk.MenuItem("Connecting to Podio, please wait...")
+            
+            self.try_connect.show()
+            self.menu.append(self.try_connect)
 
         # Separators
         sep_1 = Gtk.SeparatorMenuItem()
