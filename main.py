@@ -125,6 +125,7 @@ class PodioTaskApplet:
             self.try_connect = Gtk.MenuItem("Connecting to Podio, please wait...")
             
             self.try_connect.show()
+            self.try_connect.set_sensitive(False)
             self.menu.append(self.try_connect)
 
         # Separators
