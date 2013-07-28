@@ -25,7 +25,6 @@ class PodioTaskApplet:
         self.refresh = "false"
        
         self.menu_setup()
-        self.ind.set_menu(self.menu)
        
     def save_settings(self , dialog, *_args):
         db = self.con.cursor()    
@@ -43,6 +42,8 @@ class PodioTaskApplet:
         self.menu_setup()
         
     def list_task (self):
+        
+        self.menu = Gtk.Menu()
            
         db = self.con.cursor()    
         db.execute("SELECT * from podio_user")
@@ -66,7 +67,7 @@ class PodioTaskApplet:
          
             task = c.Task.get_summary(limit = 50)
             overdue = 0
-
+            
     
             if "overdue" in task and task["overdue"]["total"] > 0:
                 
@@ -122,11 +123,11 @@ class PodioTaskApplet:
         try :        
             self.list_task()
         except:
-            self.try_connect = Gtk.MenuItem("Connecting to Podio, please wait...")
+            try_connect = Gtk.MenuItem("Connecting to Podio, please wait...")
             
-            self.try_connect.show()
-            self.try_connect.set_sensitive(False)
-            self.menu.append(self.try_connect)
+            try_connect.show()
+            try_connect.set_sensitive(False)
+            self.menu.append(try_connect)
 
         # Separators
         sep_1 = Gtk.SeparatorMenuItem()
@@ -170,6 +171,8 @@ class PodioTaskApplet:
         self.quit_item.connect("activate", self.quit)
         self.quit_item.show()
         self.menu.append(self.quit_item)   
+        
+        self.ind.set_menu(self.menu)
       
     def open_about_item(self, widget) :
         
@@ -208,7 +211,7 @@ class PodioTaskApplet:
     def refresh_task(self, widget):
         self.refresh = "true"
         self.menu_setup()
-        
+
         
     def on_cancel_clicked(self, dialog, *_args):
         dialog.destroy()
