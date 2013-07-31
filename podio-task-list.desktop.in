@@ -1,0 +1,8 @@
+[Desktop Entry]
+_Name=Podio Task List
+_Comment=PodioTaskList application
+Categories=GNOME;Utility;
+Exec=podio-task-list
+Icon=podio-task-list
+Terminal=false
+Type=Application
