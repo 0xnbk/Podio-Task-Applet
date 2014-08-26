@@ -225,3 +225,9 @@ class PodioTaskApplet:
 if __name__ == "__main__":
     indicator = PodioTaskApplet()
     Gtk.main()
+
+
+        #
+        # connecting = self.menu.addAction("Connecting to Podio")
+        # connecting.setDisabled(True)
+        # connecting.triggered.connect(self.signin_view)
